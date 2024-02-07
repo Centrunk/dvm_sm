@@ -1,0 +1,79 @@
+# TODO: stop all centrunk services prior to run
+- name: "Stop All DVM Services"
+  hosts: all
+  become: yes
+  become_user: root
+  tasks:
+    - name: Check if CC Service Exists
+      stat: path=/etc/systemd/system/centrunk.cc.service
+      register: cc_service_status
+    - name: Check if VC Service Exists
+      stat: path=/etc/systemd/system/centrunk.vc.service
+      register: vc_service_status
+    - name: Check if VOC Service Exists
+      stat: path=/etc/systemd/system/centrunk.voc.service
+      register: voc_service_status
+    - name: Check if DVRS Service Exists
+      stat: path=/etc/systemd/system/centrunk.dvrs.service
+      register: dvrs_service_status
+    - name: Check if CONV Service Exists
+      stat: path=/etc/systemd/system/centrunk.conv.service
+      register: conv_service_status
+    - name: Stop Centrunk Services
+      ansible.builtin.systemd:
+        name: centrunk.cc
+        state: stopped
+      when: cc_service_status.stat.exists
+    - name: Stop Centrunk Services
+      ansible.builtin.systemd:
+        name: centrunk.vc
+        state: stopped
+      when: vc_service_status.stat.exists
+    - name: Stop Centrunk Services
+      ansible.builtin.systemd:
+        name: centrunk.voc
+        state: stopped
+      when: voc_service_status.stat.exists
+    - name: Stop Centrunk Services
+      ansible.builtin.systemd:
+        name: centrunk.dvrs
+        state: stopped
+      when: dvrs_service_status.stat.exists
+    - name: Stop Centrunk Services
+      ansible.builtin.systemd:
+        name: centrunk.conv
+        state: stopped
+      when: conv_service_status.stat.exists
+    - name: Sleep for 300 seconds and continue with play
+      ansible.builtin.wait_for:
+        timeout: 2000
+- name: "Start All DVM Services"
+  hosts: all
+  become: yes
+  become_user: root
+  tasks:
+    - name: Start Centrunk Services
+      ansible.builtin.systemd:
+        name: centrunk.cc
+        state: started
+      when: cc_service_status.stat.exists
+        - name: Start Centrunk Services
+      ansible.builtin.systemd:
+        name: centrunk.vc
+        state: started
+      when: vc_service_status.stat.exists
+    - name: Start Centrunk Services
+      ansible.builtin.systemd:
+        name: centrunk.voc
+        state: started
+      when: voc_service_status.stat.exists
+    - name: Start Centrunk Services
+      ansible.builtin.systemd:
+        name: centrunk.dvrs
+        state: started
+      when: dvrs_service_status.stat.exists
+    - name: Start Centrunk Services
+      ansible.builtin.systemd:
+        name: centrunk.conv
+        state: started
+      when: conv_service_status.stat.exists

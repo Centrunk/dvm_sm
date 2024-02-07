@@ -1,0 +1,67 @@
+- name: "Stop all Centrunk Services"
+  hosts: all
+  become: yes
+  become_user: root
+  tasks:
+    - name: Check if CC Service Exists
+      stat: path=/etc/systemd/system/centrunk.cc.service
+      register: cc_service_status
+    - name: Check if VC Service Exists
+      stat: path=/etc/systemd/system/centrunk.vc.service
+      register: vc_service_status
+    - name: Check if VOC Service Exists
+      stat: path=/etc/systemd/system/centrunk.voc.service
+      register: voc_service_status
+    - name: Check if DVRS Service Exists
+      stat: path=/etc/systemd/system/centrunk.dvrs.service
+      register: dvrs_service_status
+    - name: Check if CONV Service Exists
+      stat: path=/etc/systemd/system/centrunk.conv.service
+      register: conv_service_status
+    - name: Stop Centrunk Services
+      ansible.builtin.systemd:
+        name: centrunk.cc
+        state: stopped
+      when: cc_service_status.stat.exists
+    - name: Stop Centrunk Services
+      ansible.builtin.systemd:
+        name: centrunk.vc
+        state: stopped
+      when: vc_service_status.stat.exists
+    - name: Stop Centrunk Services
+      ansible.builtin.systemd:
+        name: centrunk.voc
+        state: stopped
+      when: voc_service_status.stat.exists
+    - name: Stop Centrunk Services
+      ansible.builtin.systemd:
+        name: centrunk.dvrs
+        state: stopped
+      when: dvrs_service_status.stat.exists
+    - name: Stop Centrunk Services
+      ansible.builtin.systemd:
+        name: centrunk.conv
+        state: stopped
+      when: conv_service_status.stat.exists
+- name: "Archive all old Logs"
+  hosts: all
+  become: yes
+  become_user: root
+  tasks:
+    - name: Compress directory /var/log/centrunk into /var/log/centrunk-rotate-{{ ansible_date_time.date }}
+      community.general.archive:
+        path: /var/log/centrunk
+        dest: /var/log/centrunk-rotate-{{ ansible_date_time.date }}.tar.gz
+- name: "Update Operating System"
+  hosts: all
+  become: yes
+  become_user: root
+  tasks:
+    - name: Update all packages to their latest version
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+#TODO: compare against database the config files
+    - name: Reboot the host to refresh system.
+      ansible.builtin.reboot:
+
